@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>私人題庫測驗系統 - Glass</title>
+  <link rel="stylesheet" href="style.css?v=20260312v13" />
+</head>
+<body>
+
+  <div class="glass-container fade">
+    <h1>私人題庫測驗系統</h1>
+
+    <!-- 🔐 登入（代碼分庫） -->
+    <div id="login">
+      <h2>🔐 題庫代碼登入</h2>
+      <p class="hint">輸入代碼即可載入對應題庫（如：GHG / IPAS / LAW）。</p>
+      <input id="bankKey" type="password" class="input" placeholder="請輸入題庫代碼（例如 GHG）" />
+      <button class="btn" onclick="setBankKey()">開始使用</button>
+    </div>
+
+    <!-- 📘 題庫輸入（當前代碼沒有題庫時顯示） -->
+    <div id="setup" style="display:none;">
+      <div class="key-line">目前代碼：<span id="keyLabel_setup" class="key-chip"></span>　
+        <button class="btn-secondary" onclick="switchBank()">切換代碼</button>
+      </div>
+
+      <h2>📘 請貼上題庫 JSON</h2>
+      <textarea id="jsonInput" class="input" placeholder='[
+  {"q":"題目？", "options":["A","B","C","D"], "answer":0, "explain":"解析"}
+]'></textarea>
+      <button class="btn" onclick="saveQuestions()">儲存題庫</button>
+    </div>
+     
+    <!-- 🧪 測驗主畫面 -->
+    <div id="quiz" style="display:none;">
+      <div class="key-line">目前代碼：<span id="keyLabel_quiz" class="key-chip"></span>　
+        <button class="btn-secondary" onclick="switchBank()">切換代碼</button>
+      </div>
+
+      <!-- 題數選擇 -->
+      <div class="select-box">
+        <label>選擇練習題數：</label>
+        <select id="questionCount" onchange="applyQuestionCount(true)">
+          <option value="all">全部題目</option>
+          <option value="10">10 題</option>
+          <option value="20">20 題</option>
+          <option value="30">30 題</option>
+          <option value="50">50 題</option>
+        </select>
+      </div>
+
+      <!-- 進度與計分 -->
+      <div class="progress-bar"><div id="progress" class="progress"></div></div>
+      <div class="score">題目 <span id="current">0</span>/<span id="total">0</span> ｜ 分數：<span id="score">0</span></div>
+
+      <h2 id="question" class="fade"></h2>
+      <div id="options" class="fade"></div>
+
+      <p id="feedback"></p>
+      
+      <button class="btn" onclick="reshuffleNewSet()">重新抽題</button>
+      <button class="btn-secondary" onclick="prevQuestion()">上一題</button>
+      <button class="btn" onclick="nextQuestion()">下一題</button>
+      <button class="btn-warning" onclick="showWrong()">查看錯題本</button>
+      <button class="btn-danger" onclick="resetAll()">重置本代碼題庫＆資料</button>
+    </div>
+
+    <!-- ❌ 錯題本 -->
+    <div id="wrongBox" style="display:none;">
+      <div class="key-line">目前代碼：<span id="keyLabel_wrong" class="key-chip"></span></div>
+      <h2>❌ 錯題本</h2>
+      <ul id="wrongList"></ul>
+      <button class="btn" onclick="backToQuiz()">返回測驗</button>
+    </div>
+  </div>
+
+  <script src="script.js?v=20260312v13"></script>
+</body>
+</html>
