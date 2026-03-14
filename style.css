@@ -107,4 +107,226 @@ body {
 .btn-success { background: #00c78a; color: #000; box-shadow: 0 0 10px rgba(0,199,138,0.4); border: none; cursor: pointer; }
 .btn-success:hover { filter: brightness(1.05); transform: translateY(-1px); }
 
+/* ===== 輸入方式選擇（貼上 vs 匯入） ===== */
+.method-selector {
+  display: flex; gap: 10px; margin: 16px 0 20px;
+}
+.method-btn {
+  flex: 1; padding: 12px 16px; border: none; border-radius: 10px;
+  background: rgba(255,255,255,0.12); color: #fff; cursor: pointer;
+  font-size: 15px; font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 8px rgba(255,255,255,0.08);
+}
+.method-btn:hover {
+  background: rgba(255,255,255,0.18);
+  transform: translateY(-1px);
+}
+.method-btn.active {
+  background: #2980ff;
+  box-shadow: 0 0 12px rgba(41,128,255,0.6);
+}
+.input-method { animation: fadeIn 0.3s ease; }
+
+/* ===== 檔案輸入樣式 ===== */
+.file-input-wrapper {
+  position: relative;
+  margin: 16px 0 12px;
+}
+.file-input-wrapper input[type="file"] {
+  display: none;
+}
+.file-label {
+  display: flex;
+  align-items: center; justify-content: center;
+  padding: 24px 16px;
+  background: rgba(255,255,255,0.10);
+  border: 2px dashed rgba(255,255,255,0.30);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 16px;
+  color: #fff;
+}
+.file-label:hover {
+  background: rgba(255,255,255,0.16);
+  border-color: rgba(41,128,255,0.6);
+  box-shadow: 0 0 10px rgba(41,128,255,0.3);
+}
+.file-label span { font-weight: 600; }
+#fileStatus {
+  margin-top: 8px; padding: 8px 12px;
+  border-radius: 8px; background: rgba(255,255,255,0.08);
+  min-height: 20px;
+}
+
+/* ===== 使用說明區域 ===== */
+.guide-section {
+  margin-bottom: 28px; padding: 20px;
+  background: rgba(255,105,180,0.10);
+  border: 1px solid rgba(255,105,180,0.30);
+  border-radius: 14px;
+  backdrop-filter: blur(8px);
+  animation: fadeIn 0.6s ease;
+}
+.guide-section h3 {
+  margin: 0 0 16px 0;
+  font-size: 18px;
+  color: #ff69b4;
+  font-weight: 700;
+}
+.guide-content {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+}
+@media (max-width: 600px) {
+  .guide-content { grid-template-columns: 1fr; }
+}
+.guide-step {
+  display: flex; gap: 12px;
+  padding: 12px; border-radius: 10px;
+  background: rgba(255,255,255,0.06);
+  transition: all 0.3s ease;
+}
+.guide-step:hover {
+  background: rgba(255,255,255,0.10);
+  transform: translateX(4px);
+}
+.step-num {
+  display: flex; align-items: center; justify-content: center;
+  min-width: 36px; width: 36px; height: 36px;
+  background: #ff69b4; color: #fff; border-radius: 50%;
+  font-weight: 700; font-size: 16px; flex-shrink: 0;
+}
+.step-text {
+  flex: 1;
+}
+.step-text strong {
+  display: block; margin-bottom: 4px; font-size: 14px; color: #fff;
+}
+.step-text p {
+  margin: 0; font-size: 13px; opacity: 0.85; line-height: 1.4;
+}
+
+/* ===== 錯題本模式切換 ===== */
+.wrong-mode { animation: fadeIn 0.3s ease; }
+.wrong-practice { margin-top: 12px; }
+#practice-options { display: grid; gap: 10px; margin: 16px 0; }
+
+/* ===== 測驗模式選擇 ===== */
+.mode-selector {
+  display: flex; gap: 10px; margin: 12px 0 18px;
+}
+.mode-btn {
+  flex: 1; padding: 12px 16px; border: none; border-radius: 10px;
+  background: rgba(255,255,255,0.12); color: #fff; cursor: pointer;
+  font-size: 15px; font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 8px rgba(255,255,255,0.08);
+}
+.mode-btn:hover {
+  background: rgba(255,255,255,0.18);
+  transform: translateY(-1px);
+}
+.mode-btn.active {
+  background: #2980ff;
+  box-shadow: 0 0 12px rgba(41,128,255,0.6);
+}
+.quiz-mode { animation: fadeIn 0.3s ease; }
+
+/* ===== 模擬考設定 ===== */
+.setting-group {
+  margin: 16px 0;
+}
+.setting-group label {
+  display: block; margin-bottom: 8px; font-weight: 600; color: #fff;
+}
+.input-with-label {
+  position: relative; display: flex; align-items: center;
+}
+.input-with-label input {
+  flex: 1;
+}
+.input-unit {
+  position: absolute; right: 12px; color: rgba(255,255,255,0.6); pointer-events: none;
+}
+.info-box {
+  background: rgba(255,105,180,0.12);
+  border: 1px solid rgba(255,105,180,0.25);
+  padding: 12px; border-radius: 10px; margin: 16px 0;
+}
+.info-box p {
+  margin: 6px 0; font-size: 14px; color: rgba(255,255,255,0.9);
+}
+
+/* ===== 模擬考進行中 ===== */
+.mock-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px; background: rgba(255,79,79,0.12);
+  border-radius: 10px; margin-bottom: 12px;
+}
+.mock-timer {
+  font-size: 32px; font-weight: 700; color: #ff4f4f;
+  font-family: 'Courier New', monospace;
+  min-width: 120px;
+}
+.mock-timer.warn { animation: blink 0.5s infinite; }
+@keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.6;} }
+.mock-info {
+  display: flex; gap: 12px; font-size: 14px; color: rgba(255,255,255,0.85);
+}
+.mock-buttons {
+  display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px;
+}
+.mock-buttons button {
+  flex: 1; min-width: 100px;
+}
+
+/* ===== 模擬考結果頁面 ===== */
+#resultContent {
+  text-align: center;
+}
+.result-score {
+  font-size: 48px; font-weight: 700; margin: 20px 0;
+  color: #00ff9d;
+}
+.result-score.fail { color: #ff4f4f; }
+.result-status {
+  font-size: 24px; font-weight: 600; margin: 16px 0;
+}
+.result-status.pass { color: #00ff9d; }
+.result-status.fail { color: #ff4f4f; }
+.result-detail {
+  background: rgba(255,255,255,0.08); padding: 16px;
+  border-radius: 10px; margin: 16px 0;
+  font-size: 14px; line-height: 1.8;
+}
+.result-detail p { margin: 6px 0; }
+.punchtime-badge {
+  display: inline-block; padding: 8px 16px;
+  background: #ff69b4; color: #fff;
+  border-radius: 20px; font-weight: 600;
+  margin: 12px 0;
+}
+.result-buttons {
+  display: flex; gap: 10px; margin-top: 20px;
+}
+.result-buttons button {
+  flex: 1;
+}
+
+/* ===== 打卡紀錄 ===== */
+#punchtimeList { padding-left: 18px; }
+#punchtimeList li { margin: 10px 0; line-height: 1.6; }
+.punchtime-item {
+  padding: 10px 8px; background: rgba(255,105,180,0.10);
+  border-left: 3px solid #ff69b4; border-radius: 6px;
+  margin-bottom: 8px;
+}
+.punchtime-info {
+  font-size: 14px; color: rgba(255,255,255,0.9);
+}
+.punchtime-score {
+  font-weight: 700; color: #ff69b4; margin: 4px 0;
+}
+
 

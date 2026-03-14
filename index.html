@@ -11,7 +11,42 @@
   <div class="glass-container fade">
     <h1>私人題庫測驗系統</h1>
 
-    <!-- 🔐 登入（代碼分庫） -->
+    <!-- � 使用說明 -->
+    <div class="guide-section">
+      <h3>📖 快速使用指南</h3>
+      <div class="guide-content">
+        <div class="guide-step">
+          <span class="step-num">1</span>
+          <div class="step-text">
+            <strong>輸入題庫代碼</strong>
+            <p>每個題庫對應一個唯一代碼（如 GHG、IPAS、LAW）</p>
+          </div>
+        </div>
+        <div class="guide-step">
+          <span class="step-num">2</span>
+          <div class="step-text">
+            <strong>選擇匯入方式</strong>
+            <p>📋 貼上 JSON 或 📁 匯入 JSON 檔案</p>
+          </div>
+        </div>
+        <div class="guide-step">
+          <span class="step-num">3</span>
+          <div class="step-text">
+            <strong>開始練習</strong>
+            <p>選擇題數、逐題作答、即時反饋與解析</p>
+          </div>
+        </div>
+        <div class="guide-step">
+          <span class="step-num">4</span>
+          <div class="step-text">
+            <strong>查看錯題本</strong>
+            <p>記錄所有錯誤，重做錯題，標記已掌握</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- �🔐 登入（代碼分庫） -->
     <div id="login">
       <h2>🔐 題庫代碼登入</h2>
       <p class="hint">輸入代碼即可載入對應題庫（如：GHG / IPAS / LAW）。</p>
@@ -25,11 +60,35 @@
         <button class="btn-secondary" onclick="switchBank()">切換代碼</button>
       </div>
 
-      <h2>📘 請貼上題庫 JSON</h2>
-      <textarea id="jsonInput" class="input" placeholder='[
+      <!-- 選擇輸入方式 -->
+      <div class="method-selector">
+        <button class="method-btn active" onclick="switchMethod('paste')">📋 貼上 JSON</button>
+        <button class="method-btn" onclick="switchMethod('file')">📁 匯入檔案</button>
+      </div>
+
+      <!-- 貼上 JSON 方式 -->
+      <div id="pasteMethod" class="input-method">
+        <h2>📘 請貼上題庫 JSON</h2>
+        <textarea id="jsonInput" class="input" placeholder='[
   {"q":"題目？", "options":["A","B","C","D"], "answer":0, "explain":"解析"}
 ]'></textarea>
-      <button class="btn" onclick="saveQuestions()">儲存題庫</button>
+        <p class="hint">💡 點擊下方下載範例 JSON 檔案查看格式</p>
+        <button class="btn-secondary" onclick="downloadExample()">⬇️ 下載範例 JSON</button>
+        <button class="btn" onclick="saveQuestions()">儲存題庫</button>
+      </div>
+
+      <!-- 匯入檔案方式 -->
+      <div id="fileMethod" class="input-method" style="display:none;">
+        <h2>📘 請選擇 JSON 檔案</h2>
+        <div class="file-input-wrapper">
+          <input type="file" id="jsonFile" accept=".json" onchange="loadFromFile()" />
+          <label for="jsonFile" class="file-label">
+            <span>📁 選擇 JSON 檔案</span>
+          </label>
+        </div>
+        <div id="fileStatus" class="hint"></div>
+        <button class="btn" id="submitFileBtn" onclick="saveQuestionsFromFile()" style="display:none;">儲存題庫</button>
+      </div>
     </div>
      
     <!-- 🧪 測驗主畫面 -->
@@ -38,40 +97,161 @@
         <button class="btn-secondary" onclick="switchBank()">切換代碼</button>
       </div>
 
-      <!-- 題數選擇 -->
-      <div class="select-box">
-        <label>選擇練習題數：</label>
-        <select id="questionCount" onchange="applyQuestionCount(true)">
-          <option value="all">全部題目</option>
-          <option value="10">10 題</option>
-          <option value="20">20 題</option>
-          <option value="30">30 題</option>
-          <option value="50">50 題</option>
-        </select>
+      <!-- 模式選擇 -->
+      <div class="mode-selector">
+        <button class="mode-btn active" onclick="switchQuizMode('normal')">📚 普通練習</button>
+        <button class="mode-btn" onclick="switchQuizMode('mock')">📝 模擬考試</button>
       </div>
 
-      <!-- 進度與計分 -->
-      <div class="progress-bar"><div id="progress" class="progress"></div></div>
-      <div class="score">題目 <span id="current">0</span>/<span id="total">0</span> ｜ 分數：<span id="score">0</span></div>
+      <!-- 普通練習模式 -->
+      <div id="normalMode" class="quiz-mode">
+        <!-- 題數選擇 -->
+        <div class="select-box">
+          <label>選擇練習題數：</label>
+          <select id="questionCount" onchange="applyQuestionCount(true)">
+            <option value="all">全部題目</option>
+            <option value="10">10 題</option>
+            <option value="20">20 題</option>
+            <option value="30">30 題</option>
+            <option value="50">50 題</option>
+          </select>
+        </div>
 
-      <h2 id="question" class="fade"></h2>
-      <div id="options" class="fade"></div>
+        <!-- 進度與計分 -->
+        <div class="progress-bar"><div id="progress" class="progress"></div></div>
+        <div class="score">題目 <span id="current">0</span>/<span id="total">0</span> ｜ 分數：<span id="score">0</span></div>
 
-      <p id="feedback"></p>
-      
-      <button class="btn" onclick="reshuffleNewSet()">重新抽題</button>
-      <button class="btn-secondary" onclick="prevQuestion()">上一題</button>
-      <button class="btn" onclick="nextQuestion()">下一題</button>
-      <button class="btn-warning" onclick="showWrong()">查看錯題本</button>
-      <button class="btn-danger" onclick="resetAll()">重置本代碼題庫＆資料</button>
+        <h2 id="question" class="fade"></h2>
+        <div id="options" class="fade"></div>
+
+        <p id="feedback"></p>
+        
+        <button class="btn" onclick="reshuffleNewSet()">重新抽題</button>
+        <button class="btn-secondary" onclick="prevQuestion()">上一題</button>
+        <button class="btn" onclick="nextQuestion()">下一題</button>
+        <button class="btn-warning" onclick="showWrong()">查看錯題本</button>
+        <button class="btn-danger" onclick="resetAll()">重置本代碼題庫＆資料</button>
+      </div>
+
+      <!-- 模擬考試模式 -->
+      <div id="mockMode" class="quiz-mode" style="display:none;">
+        <!-- 模擬考設定界面 -->
+        <div id="mockSetup" style="display:block;">
+          <h2>📝 模擬考試設定</h2>
+          
+          <div class="setting-group">
+            <label>考題數量：</label>
+            <div class="input-with-label">
+              <input type="number" id="mockQuestionNum" value="50" min="1" style="width: 100%; padding: 10px; border-radius: 8px; border: none; background: rgba(255,255,255,0.15); color: #fff; font-size: 16px;" />
+              <span class="input-unit">題</span>
+            </div>
+          </div>
+
+          <div class="setting-group">
+            <label>及格分數：</label>
+            <div class="input-with-label">
+              <input type="number" id="mockPassScore" value="60" min="10" max="90" style="width: 100%; padding: 10px; border-radius: 8px; border: none; background: rgba(255,255,255,0.15); color: #fff; font-size: 16px;" />
+              <span class="input-unit">分</span>
+            </div>
+          </div>
+
+          <div class="info-box">
+            <p>⏰ 考試時間：40 分鐘</p>
+            <p>📊 計分方式：一題 10 分，滿分 100 分</p>
+            <p>✏️ 錯誤題目將加入錯題本</p>
+          </div>
+
+          <button class="btn" onclick="startMockExam()" style="width: 100%; padding: 14px; font-size: 18px;">開始模擬考試</button>
+          <button class="btn-secondary" onclick="switchQuizMode('normal')" style="width: 100%; padding: 12px; margin-top: 10px;">返回練習</button>
+        </div>
+
+        <!-- 模擬考進行中 -->
+        <div id="mockExam" style="display:none;">
+          <div class="mock-header">
+            <div class="mock-timer" id="mockTimer">40:00</div>
+            <div class="mock-info">
+              <span>及格分數：<span id="mockPassLabel">60</span> 分</span>
+              <span>|</span>
+              <span>題目 <span id="mockCurrent">1</span>/<span id="mockTotal">50</span></span>
+            </div>
+          </div>
+
+          <div class="progress-bar"><div id="mockProgress" class="progress"></div></div>
+          <div class="score">分數：<span id="mockScore">0</span> / 100</div>
+
+          <h2 id="mockQuestion" class="fade"></h2>
+          <div id="mockOptions" class="fade"></div>
+
+          <p id="mockFeedback"></p>
+
+          <div class="mock-buttons">
+            <button class="btn-secondary" onclick="mockPrevQuestion()">上一題</button>
+            <button class="btn" onclick="mockNextQuestion()">下一題</button>
+            <button class="btn-danger" onclick="submitMockExam()">提交答卷</button>
+          </div>
+        </div>
+
+        <!-- 模擬考結果 -->
+        <div id="mockResult" style="display:none;">
+          <div id="resultContent"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 🏆 打卡紀錄 -->
+    <div id="punchtimeBox" style="display:none;">
+      <div class="key-line">目前代碼：<span id="keyLabel_punchtime" class="key-chip"></span></div>
+      <h2>🏆 模擬考打卡記錄</h2>
+      <ul id="punchtimeList"></ul>
+      <button class="btn" onclick="backToQuiz()">返回測驗</button>
+      <button class="btn-secondary" onclick="showWrong()">返回錯題本</button>
     </div>
 
     <!-- ❌ 錯題本 -->
     <div id="wrongBox" style="display:none;">
       <div class="key-line">目前代碼：<span id="keyLabel_wrong" class="key-chip"></span></div>
       <h2>❌ 錯題本</h2>
-      <ul id="wrongList"></ul>
-      <button class="btn" onclick="backToQuiz()">返回測驗</button>
+
+      <!-- 錯題模式選擇 -->
+      <div class="method-selector">
+        <button class="method-btn active" onclick="switchWrongMode('review')">📋 查看錯題</button>
+        <button class="method-btn" onclick="switchWrongMode('practice')">💪 錯題練習</button>
+      </div>
+
+      <!-- 查看錯題模式 -->
+      <div id="reviewMode" class="wrong-mode">
+        <ul id="wrongList"></ul>
+        <button class="btn" onclick="backToQuiz()">返回測驗</button>
+        <button class="btn-secondary" onclick="showPunchtime()">查看打卡紀錄</button>
+      </div>
+
+      <!-- 錯題練習模式 -->
+      <div id="practiceMode" class="wrong-mode" style="display:none;">
+        <div class="wrong-practice">
+          <!-- 題數選擇 -->
+          <div class="select-box">
+            <label>選擇練習模式：</label>
+            <select id="practiceMode_select" onchange="applyWrongPracticeMode(true)">
+              <option value="all">全部錯題</option>
+              <option value="3plus">答錯3次以上</option>
+              <option value="5plus">答錯5次以上</option>
+            </select>
+          </div>
+
+          <!-- 進度與計分 -->
+          <div class="progress-bar"><div id="practice-progress" class="progress"></div></div>
+          <div class="score">題目 <span id="practice-current">0</span>/<span id="practice-total">0</span> ｜ 分數：<span id="practice-score">0</span></div>
+
+          <h2 id="practice-question" class="fade"></h2>
+          <div id="practice-options" class="fade"></div>
+
+          <p id="practice-feedback"></p>
+          
+          <button class="btn-secondary" onclick="practiceBackQuestion()">上一題</button>
+          <button class="btn" onclick="practiceNextQuestion()">下一題</button>
+          <button class="btn" onclick="backToWrongList()">返回錯題本</button>
+        </div>
+      </div>
     </div>
   </div>
 
