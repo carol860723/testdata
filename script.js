@@ -17,6 +17,20 @@ let mockFeedback = [];          // 模擬考回饋記錄
 let mockPassScore = 60;         // 及格分數
 let mockTimeLeft = 40 * 60;     // 剩餘秒數（40分鐘）
 let mockTimerId = null;         // 計時器ID
+let mockScorePerQuestion = 0;   // 每題分數
+
+/* 正式測驗相關 */
+let formalExamActive = false;   // 是否正在進行正式測驗
+let formalQuestions = [];        // 正式測驗題目
+let formalIndex = 0;           // 當前題目索引
+let formalScore = 0;           // 正式測驗分數
+let formalChoices = [];        // 正式測驗答題記錄
+let formalFeedback = [];       // 正式測驗回饋記錄
+let formalPassScore = 60;      // 及格分數
+let formalScorePerQuestion = 0; // 每題分數
+let formalBankCodes = [];      // 選擇的題庫代碼
+let formalName = '';           // 測驗者姓名
+let formalDate = '';           // 測驗日期
 
 /* 作答紀錄（回上一題需要） */
 let userChoices   = [];   // 每題使用者選了哪個選項（index），沒答過 = undefined
@@ -665,20 +679,38 @@ function switchQuizMode(mode) {
 
   const normalDiv = document.getElementById('normalMode');
   const mockDiv = document.getElementById('mockMode');
+  const formalDiv = document.getElementById('formalMode');
 
   if (mode === 'normal') {
     normalDiv.style.display = 'block';
     mockDiv.style.display = 'none';
+    formalDiv.style.display = 'none';
     if (mockExamActive) {
       if (mockTimerId) clearInterval(mockTimerId);
       mockExamActive = false;
     }
+    if (formalExamActive) {
+      formalExamActive = false;
+    }
   } else if (mode === 'mock') {
     normalDiv.style.display = 'none';
     mockDiv.style.display = 'block';
+    formalDiv.style.display = 'none';
     document.getElementById('mockSetup').style.display = 'block';
     document.getElementById('mockExam').style.display = 'none';
     document.getElementById('mockResult').style.display = 'none';
+  } else if (mode === 'formal') {
+    normalDiv.style.display = 'none';
+    mockDiv.style.display = 'none';
+    formalDiv.style.display = 'block';
+    document.getElementById('formalSetup').style.display = 'block';
+    document.getElementById('formalExam').style.display = 'none';
+    document.getElementById('formalResult').style.display = 'none';
+    // 初始化題庫列表（如果為空）
+    const bankList = document.getElementById('bankList');
+    if (bankList.children.length === 0) {
+      addBankRow();
+    }
   }
 }
 
@@ -697,8 +729,8 @@ function startMockExam() {
     alert(`考題數量應在 1 ~ ${fullQuestions.length} 之間`);
     return;
   }
-  if (pass < 10 || pass > 90) {
-    alert('及格分數應在 10 ~ 90 之間');
+  if (pass < 10 || pass > 100) {
+    alert('及格分數應在 10 ~ 100 之間');
     return;
   }
 
@@ -708,6 +740,7 @@ function startMockExam() {
   const pool = [...fullQuestions];
   shuffle(pool);
   mockQuestions = pool.slice(0, num);
+  mockScorePerQuestion = 100 / mockQuestions.length; // 計算每題分數
 
   mockIndex = 0;
   mockScore = 0;
@@ -825,8 +858,8 @@ function checkMockAnswer(choice) {
   if (choice === q.answer) {
     fb.innerHTML = `✔ 正確<br><br>詳解：${q.explain || '無'}`;
     fb.className = 'correct';
-    mockScore += 10;
-    document.getElementById('mockScore').textContent = mockScore;
+    mockScore += mockScorePerQuestion;
+    document.getElementById('mockScore').textContent = Math.round(mockScore * 100) / 100;
   } else {
     fb.innerHTML = `✘ 錯誤，正確答案：${q.options[q.answer]}<br><br>詳解：${q.explain || '無'}`;
     fb.className = 'incorrect';
@@ -866,7 +899,8 @@ function submitMockExam() {
   // 停止計時
   if (mockTimerId) clearInterval(mockTimerId);
 
-  const isPassed = mockScore >= mockPassScore;
+  const finalScore = Math.round(mockScore * 100) / 100;
+  const isPassed = finalScore >= mockPassScore;
   const usedSeconds = 40 * 60 - mockTimeLeft;
   const mins = Math.floor(usedSeconds / 60);
   const secs = usedSeconds % 60;
@@ -875,8 +909,8 @@ function submitMockExam() {
   if (isPassed) {
     savePunchtime({
       date: new Date().toLocaleString('zh-TW'),
-      score: mockScore,
-      total: mockQuestions.length * 10,
+      score: finalScore,
+      total: 100,
       passScore: mockPassScore,
       timeUsed: `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
     });
@@ -886,9 +920,9 @@ function submitMockExam() {
   const resultDiv = document.getElementById('mockResult');
   let resultHTML = '<div id="resultContent">';
   resultHTML += `<h2>模擬考試結束</h2>`;
-  resultHTML += `<div class="result-score ${isPassed ? 'pass' : 'fail'}">${mockScore}</div>`;
+  resultHTML += `<div class="result-score ${isPassed ? 'pass' : 'fail'}">${finalScore.toFixed(2)}</div>`;
   resultHTML += `<div class="result-detail">`;
-  resultHTML += `<p>答對題數：${Math.floor(mockScore / 10)} / ${mockQuestions.length} 題</p>`;
+  resultHTML += `<p>答對題數：${mockChoices.filter((c, i) => c === mockQuestions[i].answer).length} / ${mockQuestions.length} 題</p>`;
   resultHTML += `<p>及格分數：${mockPassScore} 分</p>`;
   resultHTML += `<p>考試用時：${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}</p>`;
 
@@ -961,12 +995,32 @@ function renderPunchtimeList() {
     const li = document.createElement('li');
     li.className = 'punchtime-item';
     li.innerHTML = `
-      <div class="punchtime-info">【第 ${i + 1} 次】${r.date}</div>
-      <div class="punchtime-score">分數：${r.score} / ${r.total} (及格線：${r.passScore})</div>
-      <div class="punchtime-info">用時：${r.timeUsed}</div>
+      <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <div style="flex: 1;">
+          <div class="punchtime-info">【第 ${i + 1} 次】${r.date}</div>
+          <div class="punchtime-score">分數：${r.score} / ${r.total} (及格線：${r.passScore})</div>
+          <div class="punchtime-info">用時：${r.timeUsed}</div>
+        </div>
+        <button class="btn-danger btn-sm" onclick="deletePunchtime(${i})" style="padding: 6px 10px; font-size: 12px; white-space: nowrap;">🗑️ 刪除</button>
+      </div>
     `;
     list.appendChild(li);
   });
+}
+
+function deletePunchtime(index) {
+  if (!confirm('確定要刪除這筆打卡記錄嗎？')) return;
+
+  const list = getPunchtimeList();
+  list.splice(index, 1);
+
+  try {
+    localStorage.setItem(punchtimeKey(), JSON.stringify(list));
+    renderPunchtimeList();
+  } catch (e) {
+    console.error('刪除打卡紀錄失敗：', e);
+    alert('刪除失敗，請重試');
+  }
 }
 
 /***********************
@@ -1111,4 +1165,350 @@ function downloadExample() {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+}
+
+/***********************
+ * 正式測驗功能
+ ************************/
+function addBankRow() {
+  const bankList = document.getElementById('bankList');
+  const newRow = document.createElement('div');
+  newRow.className = 'bank-row';
+  newRow.style.cssText = 'display: flex; gap: 8px; margin-bottom: 10px; align-items: flex-end;';
+  newRow.innerHTML = `
+    <div style="flex: 1;">
+      <input type="text" class="input bank-code" placeholder="題庫代碼" style="margin: 0;" />
+    </div>
+    <div style="width: 100px;">
+      <input type="number" class="input bank-count" placeholder="題數" min="1" style="margin: 0;" value="20" />
+    </div>
+    <button class="btn-danger btn-sm" onclick="removeBankRow(this)" style="padding: 8px 8px; min-width: 40px;">刪除</button>
+  `;
+  bankList.appendChild(newRow);
+}
+
+function removeBankRow(btn) {
+  btn.parentElement.remove();
+}
+
+function startFormalExam() {
+  const passInput = document.getElementById('formalPassScore').value;
+  let pass = parseInt(passInput, 10);
+  
+  if (pass < 10 || pass > 100) {
+    alert('及格分數應在 10 ~ 100 之間');
+    return;
+  }
+
+  // 收集題庫代碼和題數
+  const rows = document.querySelectorAll('.bank-row');
+  if (rows.length === 0) {
+    alert('請至少新增一個題庫');
+    return;
+  }
+
+  const bankConfigs = [];
+  let totalQuestions = 0;
+
+  for (let row of rows) {
+    const codeInput = row.querySelector('.bank-code').value.trim();
+    const countInput = row.querySelector('.bank-count').value.trim();
+
+    if (!codeInput) {
+      alert('請輸入題庫代碼');
+      return;
+    }
+
+    const count = parseInt(countInput, 10);
+    if (!count || count < 1) {
+      alert(`題庫「${codeInput}」的題數必須是正整數`);
+      return;
+    }
+
+    bankConfigs.push({ code: codeInput, count });
+    totalQuestions += count;
+  }
+
+  // 解析題庫並合併題目
+  let allQuestions = [];
+  formalBankCodes = [];
+
+  for (let config of bankConfigs) {
+    try {
+      const qKey = `myQuestions_${config.code}`;
+      const savedQuestions = JSON.parse(localStorage.getItem(qKey) || '[]');
+      
+      if (savedQuestions.length === 0) {
+        alert(`題庫代碼「${config.code}」不存在或為空`);
+        return;
+      }
+
+      // 從該題庫抽取指定數量的題目
+      shuffle(savedQuestions);
+      const selectedCount = Math.min(config.count, savedQuestions.length);
+      allQuestions = allQuestions.concat(savedQuestions.slice(0, selectedCount));
+      formalBankCodes.push(config.code);
+
+      if (selectedCount < config.count) {
+        alert(`題庫「${config.code}」僅有 ${savedQuestions.length} 題，已全部選中`);
+      }
+    } catch (e) {
+      alert(`載入題庫代碼「${config.code}」失敗`);
+      return;
+    }
+  }
+
+  if (allQuestions.length === 0) {
+    alert('沒有從選定的題庫中找到任何題目');
+    return;
+  }
+
+  // 初始化正式測驗
+  formalExamActive = true;
+  formalPassScore = pass;
+  
+  shuffle(allQuestions);
+  formalQuestions = allQuestions;
+  formalScorePerQuestion = 100 / formalQuestions.length;
+
+  formalIndex = 0;
+  formalScore = 0;
+  formalChoices = new Array(formalQuestions.length).fill(undefined);
+  formalFeedback = new Array(formalQuestions.length).fill(false);
+  formalDate = new Date().toLocaleString('zh-TW');
+
+  // 更新 UI
+  document.getElementById('formalSetup').style.display = 'none';
+  document.getElementById('formalExam').style.display = 'block';
+  document.getElementById('formalResult').style.display = 'none';
+  document.getElementById('formalTotal').textContent = formalQuestions.length;
+  document.getElementById('formalPassLabel').textContent = formalPassScore;
+
+  // 加載第一題
+  loadFormalQuestion();
+}
+
+function loadFormalQuestion() {
+  if (formalIndex < 0 || formalIndex >= formalQuestions.length) return;
+
+  const q = formalQuestions[formalIndex];
+
+  // 進度
+  document.getElementById('formalProgress').style.width = `${(formalIndex / formalQuestions.length) * 100}%`;
+  document.getElementById('formalCurrent').textContent = formalIndex + 1;
+  document.getElementById('formalQuestion').textContent = q.q;
+
+  // 選項
+  const box = document.getElementById('formalOptions'); box.innerHTML = '';
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn fade';
+    btn.textContent = opt;
+    btn.onclick = () => checkFormalAnswer(i);
+    box.appendChild(btn);
+  });
+
+  // 回饋
+  const fb = document.getElementById('formalFeedback');
+  const btns = document.querySelectorAll('#formalOptions .option-btn');
+
+  if (formalFeedback[formalIndex]) {
+    const chosen = formalChoices[formalIndex];
+
+    if (chosen === q.answer) {
+      fb.innerHTML = `✔ 正確<br><br>詳解：${q.explain || '無'}`;
+      fb.className = 'correct';
+    } else {
+      fb.innerHTML = `✘ 錯誤，正確答案：${q.options[q.answer]}<br><br>詳解：${q.explain || '無'}`;
+      fb.className = 'incorrect';
+    }
+
+    btns.forEach((b, i) => {
+      b.disabled = true;
+      b.classList.remove('correct','incorrect','chosen','locked');
+      b.classList.add('locked');
+      if (i === q.answer) b.classList.add('correct');
+    });
+    if (typeof chosen === 'number' && btns[chosen]) {
+      btns[chosen].classList.add('chosen');
+      if (chosen !== q.answer) btns[chosen].classList.add('incorrect');
+    }
+  } else {
+    fb.textContent = ''; fb.className = '';
+    btns.forEach(b => {
+      b.disabled = false;
+      b.classList.remove('correct','incorrect','chosen','locked');
+    });
+  }
+
+  // 更新分數顯示
+  document.getElementById('formalScore').textContent = Math.round(formalScore * 100) / 100;
+}
+
+function checkFormalAnswer(choice) {
+  const q = formalQuestions[formalIndex];
+  const fb = document.getElementById('formalFeedback');
+  const btns = document.querySelectorAll('#formalOptions .option-btn');
+
+  formalChoices[formalIndex] = choice;
+  formalFeedback[formalIndex] = true;
+
+  if (choice === q.answer) {
+    fb.innerHTML = `✔ 正確<br><br>詳解：${q.explain || '無'}`;
+    fb.className = 'correct';
+    formalScore += formalScorePerQuestion;
+    document.getElementById('formalScore').textContent = Math.round(formalScore * 100) / 100;
+  } else {
+    fb.innerHTML = `✘ 錯誤，正確答案：${q.options[q.answer]}<br><br>詳解：${q.explain || '無'}`;
+    fb.className = 'incorrect';
+  }
+
+  btns.forEach((b, i) => {
+    b.disabled = true;
+    b.classList.remove('correct','incorrect','chosen','locked');
+    b.classList.add('locked');
+    if (i === q.answer) b.classList.add('correct');
+  });
+  if (btns[choice]) {
+    btns[choice].classList.add('chosen');
+    if (choice !== q.answer) btns[choice].classList.add('incorrect');
+  }
+}
+
+function formalPrevQuestion() {
+  if (formalIndex <= 0) return;
+  formalIndex--;
+  loadFormalQuestion();
+}
+
+function formalNextQuestion() {
+  formalIndex++;
+  if (formalIndex >= formalQuestions.length) {
+    formalIndex = formalQuestions.length - 1;
+  }
+  loadFormalQuestion();
+}
+
+function submitFormalExam() {
+  if (!confirm('確定要提交答卷嗎？提交後無法再修改。')) return;
+
+  const finalScore = Math.round(formalScore * 100) / 100;
+  const isPassed = finalScore >= formalPassScore;
+
+  if (isPassed) {
+    // 及格，顯示填寫姓名的界面
+    showNameInput(finalScore);
+  } else {
+    // 未及格，直接顯示結果
+    showFormalResult(finalScore, false, '');
+  }
+}
+
+function showNameInput(finalScore) {
+  const resultDiv = document.getElementById('formalResult');
+  let resultHTML = '<div id="resultContent">';
+  resultHTML += `<h2>恭喜及格！</h2>`;
+  resultHTML += `<div class="result-score pass">${finalScore.toFixed(2)}</div>`;
+  resultHTML += `<p style="text-align: center; margin: 20px 0; font-size: 18px;">請填寫您的姓名以生成成績單</p>`;
+  resultHTML += `<input type="text" id="studentName" class="input" placeholder="請輸入姓名" style="margin: 16px 0;" />`;
+  resultHTML += `<div class="result-buttons">`;
+  resultHTML += `<button class="btn" onclick="generateCertificate(${finalScore})">生成成績單（PDF）</button>`;
+  resultHTML += `<button class="btn-secondary" onclick="switchQuizMode('formal')">返回測驗</button>`;
+  resultHTML += `</div>`;
+  resultHTML += `</div>`;
+
+  resultDiv.innerHTML = resultHTML;
+  document.getElementById('formalSetup').style.display = 'none';
+  document.getElementById('formalExam').style.display = 'none';
+  document.getElementById('formalResult').style.display = 'block';
+}
+
+function showFormalResult(finalScore, isPassed, name) {
+  const resultDiv = document.getElementById('formalResult');
+  let resultHTML = '<div id="resultContent">';
+  resultHTML += `<h2>正式測驗結束</h2>`;
+  resultHTML += `<div class="result-score ${isPassed ? 'pass' : 'fail'}">${finalScore.toFixed(2)}</div>`;
+  resultHTML += `<div class="result-detail">`;
+  resultHTML += `<p>答對題數：${formalChoices.filter((c, i) => c === formalQuestions[i].answer).length} / ${formalQuestions.length} 題</p>`;
+  resultHTML += `<p>及格分數：${formalPassScore} 分</p>`;
+  resultHTML += `<p>測驗日期：${formalDate}</p>`;
+
+  if (isPassed) {
+    resultHTML += `<div class="punchtime-badge">✓ 及格！</div>`;
+  } else {
+    resultHTML += `<p style="color:#ff4f4f; font-weight:600;">尚未及格，請繼續努力</p>`;
+  }
+
+  resultHTML += `</div>`;
+  resultHTML += `<div class="result-buttons">`;
+  resultHTML += `<button class="btn" onclick="switchQuizMode('formal')">重新測驗</button>`;
+  resultHTML += `<button class="btn-secondary" onclick="switchQuizMode('normal')">返回練習</button>`;
+  resultHTML += `</div>`;
+  resultHTML += `</div>`;
+
+  resultDiv.innerHTML = resultHTML;
+  document.getElementById('formalSetup').style.display = 'none';
+  document.getElementById('formalExam').style.display = 'none';
+  document.getElementById('formalResult').style.display = 'block';
+  formalExamActive = false;
+}
+
+function generateCertificate(finalScore) {
+  const studentName = document.getElementById('studentName')?.value?.trim();
+  
+  if (!studentName) {
+    alert('請輸入姓名');
+    return;
+  }
+
+  formalName = studentName;
+
+  // 建立PDF內容
+  const pdfContent = `
+    <div style="padding: 40px; text-align: center; font-family: 'Microsoft JhengHei', Arial, sans-serif;">
+      <h1 style="font-size: 32px; margin-bottom: 30px;">正式測驗成績單</h1>
+      
+      <div style="border: 2px solid #2980ff; padding: 30px; border-radius: 10px; margin: 30px 0;">
+        <p style="font-size: 18px; margin: 10px 0;">考生姓名：<span style="font-weight: bold; font-size: 22px;">${studentName}</span></p>
+        
+        <p style="font-size: 18px; margin: 20px 0;">測驗成績</p>
+        <div style="font-size: 48px; font-weight: bold; color: #2980ff; margin: 20px 0;">${finalScore.toFixed(2)} 分</div>
+        
+        <div style="text-align: left; margin-top: 30px; font-size: 16px; line-height: 1.8;">
+          <p>📊 測驗詳情：</p>
+          <p>　　總題數：${formalQuestions.length} 題</p>
+          <p>　　正確數：${formalChoices.filter((c, i) => c === formalQuestions[i].answer).length} 題</p>
+          <p>　　及格分數：${formalPassScore} 分</p>
+          <p>　　測驗日期：${formalDate}</p>
+          <p>　　選用題庫：${formalBankCodes.join(', ')}</p>
+        </div>
+        
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ccc;">
+          <p style="color: #00ff9d; font-size: 20px; font-weight: bold;">✓ 恭喜及格！</p>
+        </div>
+      </div>
+      
+      <p style="margin-top: 40px; color: #999; font-size: 14px;">
+        本成績單由私人題庫測驗系統自動生成
+      </p>
+    </div>
+  `;
+
+  const element = document.createElement('div');
+  element.innerHTML = pdfContent;
+  element.style.display = 'none';
+  document.body.appendChild(element);
+
+  const opt = {
+    margin: 10,
+    filename: `${studentName}_成績單_${new Date().toISOString().split('T')[0]}.pdf`,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2 },
+    jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
+  };
+
+  html2pdf().set(opt).from(element).save().then(() => {
+    document.body.removeChild(element);
+    showFormalResult(finalScore, true, studentName);
+  });
 }

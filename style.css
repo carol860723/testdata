@@ -329,4 +329,66 @@ body {
   font-weight: 700; color: #ff69b4; margin: 4px 0;
 }
 
+/* ===== 正式測驗樣式 ===== */
+#formalOptions { display: grid; gap: 10px; margin: 16px 0; }
+#formalOptions .option-btn, #mockOptions .option-btn {
+  width:100%; padding:14px; border-radius:12px; background:rgba(255,255,255,.16);
+  backdrop-filter: blur(8px); border:none; color:#fff; font-size:18px; cursor:pointer;
+  box-shadow:0 0 12px rgba(255,255,255,.16); transition:.2s;
+}
+#formalOptions .option-btn:hover, #mockOptions .option-btn:hover {
+  transform: scale(1.02); background: rgba(255,255,255,.24);
+}
+#formalOptions .option-btn:disabled, #mockOptions .option-btn:disabled {
+  opacity:.6; cursor:not-allowed;
+}
+#formalOptions .option-btn.locked, #mockOptions .option-btn.locked {
+  cursor: not-allowed;
+  opacity: 0.88;
+}
+#formalOptions .option-btn.chosen, #mockOptions .option-btn.chosen {
+  outline: 2px solid rgba(255,255,255,0.55);
+  outline-offset: 2px;
+}
+#formalOptions .option-btn.correct, #mockOptions .option-btn.correct {
+  background: rgba(0,255,157,0.18);
+  box-shadow: 0 0 12px rgba(0,255,157,0.35);
+}
+#formalOptions .option-btn.incorrect, #mockOptions .option-btn.incorrect {
+  background: rgba(255,79,79,0.18);
+  box-shadow: 0 0 12px rgba(255,79,79,0.35);
+}
+#formalOptions .option-btn.locked:hover, #mockOptions .option-btn.locked:hover {
+  transform: none;
+}
+
+/* ===== 動態題庫表單 ===== */
+.bank-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+  align-items: flex-end;
+}
+
+.bank-row input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  font-size: 14px;
+  margin: 0;
+}
+
+.bank-row input::placeholder {
+  color: rgba(255,255,255,0.6);
+}
+
+.bank-row input:focus {
+  outline: none;
+  background: rgba(255,255,255,0.22);
+  box-shadow: 0 0 8px rgba(41,128,255,0.4);
+}
+
 

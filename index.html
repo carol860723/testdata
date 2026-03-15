@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>私人題庫測驗系統 - Glass</title>
   <link rel="stylesheet" href="style.css?v=20260312v13" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
 
@@ -101,6 +102,7 @@
       <div class="mode-selector">
         <button class="mode-btn active" onclick="switchQuizMode('normal')">📚 普通練習</button>
         <button class="mode-btn" onclick="switchQuizMode('mock')">📝 模擬考試</button>
+        <button class="mode-btn" onclick="switchQuizMode('formal')">🎓 正式測驗</button>
       </div>
 
       <!-- 普通練習模式 -->
@@ -150,14 +152,14 @@
           <div class="setting-group">
             <label>及格分數：</label>
             <div class="input-with-label">
-              <input type="number" id="mockPassScore" value="60" min="10" max="90" style="width: 100%; padding: 10px; border-radius: 8px; border: none; background: rgba(255,255,255,0.15); color: #fff; font-size: 16px;" />
+              <input type="number" id="mockPassScore" value="60" min="10" max="100" style="width: 100%; padding: 10px; border-radius: 8px; border: none; background: rgba(255,255,255,0.15); color: #fff; font-size: 16px;" />
               <span class="input-unit">分</span>
             </div>
           </div>
 
           <div class="info-box">
             <p>⏰ 考試時間：40 分鐘</p>
-            <p>📊 計分方式：一題 10 分，滿分 100 分</p>
+            <p>📊 計分方式：滿分 100 分，依題數均分</p>
             <p>✏️ 錯誤題目將加入錯題本</p>
           </div>
 
@@ -196,12 +198,83 @@
           <div id="resultContent"></div>
         </div>
       </div>
+
+      <!-- 正式測驗模式 -->
+      <div id="formalMode" class="quiz-mode" style="display:none;">
+        <!-- 正式測驗設定界面 -->
+        <div id="formalSetup" style="display:block;">
+          <h2>🎓 正式測驗設定</h2>
+          
+          <div class="setting-group">
+            <label>選擇題庫與題數：</label>
+            <div id="bankList" style="margin-top: 12px;">
+              <div class="bank-row" style="display: flex; gap: 8px; margin-bottom: 10px; align-items: flex-end;">
+                <div style="flex: 1;">
+                  <input type="text" class="input bank-code" placeholder="題庫代碼" style="margin: 0;" />
+                </div>
+                <div style="width: 100px;">
+                  <input type="number" class="input bank-count" placeholder="題數" min="1" style="margin: 0;" value="20" />
+                </div>
+                <button class="btn-danger btn-sm" onclick="removeBankRow(this)" style="padding: 8px 8px; min-width: 40px;">刪除</button>
+              </div>
+            </div>
+            <button class="btn-secondary" onclick="addBankRow()" style="width: 100%; margin-top: 8px;">➕ 新增題庫</button>
+          </div>
+
+          <div class="setting-group">
+            <label>及格分數：</label>
+            <div class="input-with-label">
+              <input type="number" id="formalPassScore" value="60" min="10" max="100" style="width: 100%; padding: 10px; border-radius: 8px; border: none; background: rgba(255,255,255,0.15); color: #fff; font-size: 16px;" />
+              <span class="input-unit">分</span>
+            </div>
+          </div>
+
+          <div class="info-box">
+            <p>📊 計分方式：滿分 100 分，總題數為所有題庫題數之和</p>
+            <p>✏️ 可以分別指定每個題庫要抽取的題數</p>
+            <p>✏️ 及格後需填寫姓名並生成成績單</p>
+          </div>
+
+          <button class="btn" onclick="startFormalExam()" style="width: 100%; padding: 14px; font-size: 18px;">開始正式測驗</button>
+          <button class="btn-secondary" onclick="switchQuizMode('normal')" style="width: 100%; padding: 12px; margin-top: 10px;">返回練習</button>
+        </div>
+
+        <!-- 正式測驗進行中 -->
+        <div id="formalExam" style="display:none;">
+          <div class="mock-header">
+            <div class="mock-info">
+              <span>及格分數：<span id="formalPassLabel">60</span> 分</span>
+              <span>|</span>
+              <span>題目 <span id="formalCurrent">1</span>/<span id="formalTotal">50</span></span>
+            </div>
+          </div>
+
+          <div class="progress-bar"><div id="formalProgress" class="progress"></div></div>
+          <div class="score">分數：<span id="formalScore">0</span> / 100</div>
+
+          <h2 id="formalQuestion" class="fade"></h2>
+          <div id="formalOptions" class="fade"></div>
+
+          <p id="formalFeedback"></p>
+
+          <div class="mock-buttons">
+            <button class="btn-secondary" onclick="formalPrevQuestion()">上一題</button>
+            <button class="btn" onclick="formalNextQuestion()">下一題</button>
+            <button class="btn-danger" onclick="submitFormalExam()">提交答卷</button>
+          </div>
+        </div>
+
+        <!-- 正式測驗結果 -->
+        <div id="formalResult" style="display:none;">
+          <div id="formalResultContent"></div>
+        </div>
+      </div>
     </div>
 
     <!-- 🏆 打卡紀錄 -->
     <div id="punchtimeBox" style="display:none;">
       <div class="key-line">目前代碼：<span id="keyLabel_punchtime" class="key-chip"></span></div>
-      <h2>🏆 模擬考打卡記錄</h2>
+      <h2>🏆 打卡記錄</h2>
       <ul id="punchtimeList"></ul>
       <button class="btn" onclick="backToQuiz()">返回測驗</button>
       <button class="btn-secondary" onclick="showWrong()">返回錯題本</button>
