@@ -329,6 +329,7 @@ body {
   font-weight: 700; color: #ff69b4; margin: 4px 0;
 }
 
+
 /* ===== 正式測驗樣式 ===== */
 #formalOptions { display: grid; gap: 10px; margin: 16px 0; }
 #formalOptions .option-btn, #mockOptions .option-btn {
