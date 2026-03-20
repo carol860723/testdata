@@ -27,7 +27,7 @@
           <span class="step-num">2</span>
           <div class="step-text">
             <strong>選擇匯入方式</strong>
-            <p>📋 貼上 JSON 或 📁 匯入 JSON 檔案</p>
+            <p>貼上 JSON 或 匯入 JSON 檔案</p>
           </div>
         </div>
         <div class="guide-step">
@@ -55,7 +55,7 @@
       <button class="btn" onclick="setBankKey()">開始使用</button>
     </div>
 
-    <!-- 📘 題庫輸入（當前代碼沒有題庫時顯示） -->
+    <!-- 題庫輸入（當前代碼沒有題庫時顯示） -->
     <div id="setup" style="display:none;">
       <div class="key-line">目前代碼：<span id="keyLabel_setup" class="key-chip"></span>　
         <button class="btn-secondary" onclick="switchBank()">切換代碼</button>
@@ -63,28 +63,28 @@
 
       <!-- 選擇輸入方式 -->
       <div class="method-selector">
-        <button class="method-btn active" onclick="switchMethod('paste')">📋 貼上 JSON</button>
-        <button class="method-btn" onclick="switchMethod('file')">📁 匯入檔案</button>
+        <button class="method-btn active" onclick="switchMethod('paste')">貼上 JSON</button>
+        <button class="method-btn" onclick="switchMethod('file')">匯入檔案</button>
       </div>
 
       <!-- 貼上 JSON 方式 -->
       <div id="pasteMethod" class="input-method">
-        <h2>📘 請貼上題庫 JSON</h2>
+        <h2>請貼上題庫 JSON</h2>
         <textarea id="jsonInput" class="input" placeholder='[
   {"q":"題目？", "options":["A","B","C","D"], "answer":0, "explain":"解析"}
 ]'></textarea>
-        <p class="hint">💡 點擊下方下載範例 JSON 檔案查看格式</p>
-        <button class="btn-secondary" onclick="downloadExample()">⬇️ 下載範例 JSON</button>
+        <p class="hint">點擊下方下載範例 JSON 檔案查看格式</p>
+        <button class="btn-secondary" onclick="downloadExample()">下載範例 JSON</button>
         <button class="btn" onclick="saveQuestions()">儲存題庫</button>
       </div>
 
       <!-- 匯入檔案方式 -->
       <div id="fileMethod" class="input-method" style="display:none;">
-        <h2>📘 請選擇 JSON 檔案</h2>
+        <h2>請選擇 JSON 檔案</h2>
         <div class="file-input-wrapper">
           <input type="file" id="jsonFile" accept=".json" onchange="loadFromFile()" />
           <label for="jsonFile" class="file-label">
-            <span>📁 選擇 JSON 檔案</span>
+            <span>選擇 JSON 檔案</span>
           </label>
         </div>
         <div id="fileStatus" class="hint"></div>
@@ -92,7 +92,7 @@
       </div>
     </div>
      
-    <!-- 🧪 測驗主畫面 -->
+    <!-- 測驗主畫面 -->
     <div id="quiz" style="display:none;">
       <div class="key-line">目前代碼：<span id="keyLabel_quiz" class="key-chip"></span>　
         <button class="btn-secondary" onclick="switchBank()">切換代碼</button>
@@ -100,9 +100,9 @@
 
       <!-- 模式選擇 -->
       <div class="mode-selector">
-        <button class="mode-btn active" onclick="switchQuizMode('normal')">📚 普通練習</button>
-        <button class="mode-btn" onclick="switchQuizMode('mock')">📝 模擬考試</button>
-        <button class="mode-btn" onclick="switchQuizMode('formal')">🎓 正式測驗</button>
+        <button class="mode-btn active" onclick="switchQuizMode('normal')">普通練習</button>
+        <button class="mode-btn" onclick="switchQuizMode('mock')">模擬考試</button>
+        <button class="mode-btn" onclick="switchQuizMode('formal')">正式測驗</button>
       </div>
 
       <!-- 普通練習模式 -->
@@ -139,7 +139,7 @@
       <div id="mockMode" class="quiz-mode" style="display:none;">
         <!-- 模擬考設定界面 -->
         <div id="mockSetup" style="display:block;">
-          <h2>📝 模擬考試設定</h2>
+          <h2>模擬考試設定</h2>
           
           <div class="setting-group">
             <label>考題數量：</label>
@@ -158,9 +158,9 @@
           </div>
 
           <div class="info-box">
-            <p>⏰ 考試時間：40 分鐘</p>
-            <p>📊 計分方式：滿分 100 分，依題數均分</p>
-            <p>✏️ 錯誤題目將加入錯題本</p>
+            <p>考試時間：40 分鐘</p>
+            <p>計分方式：滿分 100 分，依題數均分</p>
+            <p>錯誤題目將加入錯題本</p>
           </div>
 
           <button class="btn" onclick="startMockExam()" style="width: 100%; padding: 14px; font-size: 18px;">開始模擬考試</button>
@@ -203,7 +203,7 @@
       <div id="formalMode" class="quiz-mode" style="display:none;">
         <!-- 正式測驗設定界面 -->
         <div id="formalSetup" style="display:block;">
-          <h2>🎓 正式測驗設定</h2>
+          <h2>正式測驗設定</h2>
           
           <div class="setting-group">
             <label>選擇題庫與題數：</label>
@@ -230,9 +230,9 @@
           </div>
 
           <div class="info-box">
-            <p>📊 計分方式：滿分 100 分，總題數為所有題庫題數之和</p>
-            <p>✏️ 可以分別指定每個題庫要抽取的題數</p>
-            <p>✏️ 及格後需填寫姓名並生成成績單</p>
+            <p>計分方式：滿分 100 分，總題數為所有題庫題數之和</p>
+            <p>可以分別指定每個題庫要抽取的題數</p>
+            <p>及格後需填寫姓名並生成成績單</p>
           </div>
 
           <button class="btn" onclick="startFormalExam()" style="width: 100%; padding: 14px; font-size: 18px;">開始正式測驗</button>
