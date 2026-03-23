@@ -1,25 +1,102 @@
 /* ===== 全黑底、白字（Glass 風） ===== */
+:root {
+  --bg-primary: #131212;
+  --bg-secondary: rgba(255,255,255,0.06);
+  --bg-tertiary: rgba(255,255,255,0.14);
+  --bg-input: rgba(255,255,255,0.14);
+  --bg-button-hover: rgba(255,255,255,0.24);
+  --text-primary: #fff;
+  --text-secondary: rgba(255,255,255,0.85);
+  --glass-shadow: 0 0 22px rgba(255,255,255,0.12);
+  --glass-backdrop: rgba(255,255,255,0.06);
+}
+
+body[data-theme="light"] {
+  --bg-primary: #f5f5f5;
+  --bg-secondary: rgba(0,0,0,0.06);
+  --bg-tertiary: rgba(0,0,0,0.08);
+  --bg-input: rgba(0,0,0,0.08);
+  --bg-button-hover: rgba(0,0,0,0.12);
+  --text-primary: #333;
+  --text-secondary: rgba(0,0,0,0.75);
+  --glass-shadow: 0 0 22px rgba(0,0,0,0.1);
+  --glass-backdrop: rgba(255,255,255,0.8);
+}
+
 body {
   margin: 0; padding: 0;
   font-family: "Microsoft JhengHei", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  background: #000; color: #fff;
+  background: var(--bg-primary); color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 .glass-container {
   width: 90%; max-width: 760px; margin: 60px auto; padding: 28px;
-  border-radius: 20px; background: rgba(255,255,255,0.06);
-  backdrop-filter: blur(12px); box-shadow: 0 0 22px rgba(255,255,255,0.12);
+  border-radius: 20px; background: var(--glass-backdrop);
+  backdrop-filter: blur(12px); box-shadow: var(--glass-shadow);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 .fade { animation: fadeIn 0.6s ease; }
 @keyframes fadeIn { from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
 
 .input {
   width: 100%; box-sizing: border-box; padding: 12px 14px;
-  background: rgba(255,255,255,0.14); color: #fff; border: none; border-radius: 10px;
+  background: var(--bg-input); color: var(--text-primary); border: none; border-radius: 10px;
   margin: 8px 0 12px; outline: none;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 .hint { opacity:.85; }
 .key-line { margin-bottom: 8px; }
-.key-chip { display:inline-block; padding:4px 8px; background:rgba(255,255,255,0.16); border-radius:8px; font-weight:600; }
+.key-chip { display:inline-block; padding:4px 8px; background:var(--bg-secondary); border-radius:8px; font-weight:600; transition: background-color 0.3s ease; }
+
+/* 頭部樣式和主題切換 */
+.header-top {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;
+}
+.header-top h1 {
+  margin: 0; flex: 1;
+}
+.theme-toggle {
+  width: 44px; height: 44px; border-radius: 50%;
+  border: none; background: var(--bg-secondary);
+  color: var(--text-primary); font-size: 20px;
+  cursor: pointer; transition: all 0.3s ease;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+.theme-toggle:hover {
+  background: var(--bg-tertiary);
+  transform: scale(1.1);
+}
+.theme-icon {
+  display: inline-block;
+}
+
+/* 指南標題和展開按鈕 */
+.guide-header {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;
+}
+.guide-header h3 {
+  margin: 0; color: #ff69b4; font-size: 18px; font-weight: 700; flex: 1;
+}
+body[data-theme="light"] .guide-header h3 {
+  color: #d62f7a;
+}
+.guide-toggle {
+  width: 32px; height: 32px; border-radius: 50%;
+  border: none; background: rgba(255,105,180,0.25);
+  color: #ff69b4; font-size: 20px; font-weight: bold;
+  cursor: pointer; transition: all 0.3s ease;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0;
+}
+body[data-theme="light"] .guide-toggle {
+  background: rgba(214,47,122,0.2);
+  color: #d62f7a;
+}
+.guide-toggle:hover {
+  background: rgba(255,105,180,0.4);
+  transform: scale(1.1);
+}
 
 .btn, .btn-warning, .btn-danger, .btn-secondary {
   width: auto; padding: 10px 14px; border: none; border-radius: 10px;
@@ -32,26 +109,28 @@ body {
 .btn-secondary { background:rgba(255,255,255,.18); color:#fff; border-radius:8px; font-size:14px; }
 
 .select-box {
-  margin: 12px 0 16px; background: rgba(255,255,255,0.12);
+  margin: 12px 0 16px; background: var(--bg-secondary);
   padding: 12px; border-radius: 12px; backdrop-filter: blur(6px);
-  box-shadow: 0 0 10px rgba(255,255,255,0.12);
+  box-shadow: 0 0 10px var(--glass-shadow);
+  transition: background-color 0.3s ease;
 }
 .select-box select {
   padding: 8px 12px; border-radius: 8px; border: none;
-  background: rgba(255,255,255,0.25); color: #000;
+  background: var(--bg-input); color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-.progress-bar { width:100%; height:12px; background:rgba(255,255,255,0.15); border-radius:10px; overflow:hidden; }
+.progress-bar { width:100%; height:12px; background:var(--bg-secondary); border-radius:10px; overflow:hidden; transition: background-color 0.3s ease; }
 .progress { height:100%; width:0%; background:#00ffe1; transition:width .4s ease; box-shadow:0 0 10px #00ffe1; }
 .score { margin: 8px 0; }
 
 #options { display: grid; gap: 10px; }
 .option-btn {
-  width:100%; padding:14px; border-radius:12px; background:rgba(255,255,255,.16);
-  backdrop-filter: blur(8px); border:none; color:#fff; font-size:18px; cursor:pointer;
-  box-shadow:0 0 12px rgba(255,255,255,.16); transition:.2s;
+  width:100%; padding:14px; border-radius:12px; background:var(--bg-secondary);
+  backdrop-filter: blur(8px); border:none; color:var(--text-primary); font-size:18px; cursor:pointer;
+  box-shadow:0 0 12px var(--glass-shadow); transition:.2s;
 }
-.option-btn:hover { transform: scale(1.02); background: rgba(255,255,255,.24); }
+.option-btn:hover { transform: scale(1.02); background: var(--bg-button-hover); }
 .option-btn:disabled { opacity:.6; cursor:not-allowed; }
 
 .correct { color:#00ff9d; font-weight:600; }
@@ -113,18 +192,19 @@ body {
 }
 .method-btn {
   flex: 1; padding: 12px 16px; border: none; border-radius: 10px;
-  background: rgba(255,255,255,0.12); color: #fff; cursor: pointer;
+  background: var(--bg-secondary); color: var(--text-primary); cursor: pointer;
   font-size: 15px; font-weight: 600;
   transition: all 0.3s ease;
-  box-shadow: 0 0 8px rgba(255,255,255,0.08);
+  box-shadow: 0 0 8px rgba(0,0,0,0.1);
 }
 .method-btn:hover {
-  background: rgba(255,255,255,0.18);
+  background: var(--bg-button-hover);
   transform: translateY(-1px);
 }
 .method-btn.active {
   background: #2980ff;
   box-shadow: 0 0 12px rgba(41,128,255,0.6);
+  color: #fff;
 }
 .input-method { animation: fadeIn 0.3s ease; }
 
@@ -140,24 +220,25 @@ body {
   display: flex;
   align-items: center; justify-content: center;
   padding: 24px 16px;
-  background: rgba(255,255,255,0.10);
-  border: 2px dashed rgba(255,255,255,0.30);
+  background: var(--bg-secondary);
+  border: 2px dashed var(--bg-tertiary);
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.3s ease;
   font-size: 16px;
-  color: #fff;
+  color: var(--text-primary);
 }
 .file-label:hover {
-  background: rgba(255,255,255,0.16);
+  background: var(--bg-button-hover);
   border-color: rgba(41,128,255,0.6);
   box-shadow: 0 0 10px rgba(41,128,255,0.3);
 }
 .file-label span { font-weight: 600; }
 #fileStatus {
   margin-top: 8px; padding: 8px 12px;
-  border-radius: 8px; background: rgba(255,255,255,0.08);
+  border-radius: 8px; background: var(--bg-secondary);
   min-height: 20px;
+  transition: background-color 0.3s ease;
 }
 
 /* ===== 使用說明區域 ===== */
@@ -168,15 +249,22 @@ body {
   border-radius: 14px;
   backdrop-filter: blur(8px);
   animation: fadeIn 0.6s ease;
+  transition: all 0.3s ease;
 }
-.guide-section h3 {
-  margin: 0 0 16px 0;
-  font-size: 18px;
-  color: #ff69b4;
-  font-weight: 700;
+body[data-theme="light"] .guide-section {
+  background: rgba(214,47,122,0.08);
+  border-color: rgba(214,47,122,0.2);
 }
 .guide-content {
   display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+  transition: max-height 0.3s ease, opacity 0.3s ease;
+  overflow: hidden;
+  max-height: 1000px;
+  opacity: 1;
+}
+.guide-content.collapsed {
+  max-height: 0;
+  opacity: 0;
 }
 @media (max-width: 600px) {
   .guide-content { grid-template-columns: 1fr; }
@@ -184,11 +272,11 @@ body {
 .guide-step {
   display: flex; gap: 12px;
   padding: 12px; border-radius: 10px;
-  background: rgba(255,255,255,0.06);
+  background: var(--bg-secondary);
   transition: all 0.3s ease;
 }
 .guide-step:hover {
-  background: rgba(255,255,255,0.10);
+  background: var(--bg-button-hover);
   transform: translateX(4px);
 }
 .step-num {
@@ -201,10 +289,10 @@ body {
   flex: 1;
 }
 .step-text strong {
-  display: block; margin-bottom: 4px; font-size: 14px; color: #fff;
+  display: block; margin-bottom: 4px; font-size: 14px; color: var(--text-primary);
 }
 .step-text p {
-  margin: 0; font-size: 13px; opacity: 0.85; line-height: 1.4;
+  margin: 0; font-size: 13px; opacity: 0.85; line-height: 1.4; color: var(--text-secondary);
 }
 
 /* ===== 錯題本模式切換 ===== */
@@ -218,18 +306,19 @@ body {
 }
 .mode-btn {
   flex: 1; padding: 12px 16px; border: none; border-radius: 10px;
-  background: rgba(255,255,255,0.12); color: #fff; cursor: pointer;
+  background: var(--bg-secondary); color: var(--text-primary); cursor: pointer;
   font-size: 15px; font-weight: 600;
   transition: all 0.3s ease;
-  box-shadow: 0 0 8px rgba(255,255,255,0.08);
+  box-shadow: 0 0 8px rgba(0,0,0,0.1);
 }
 .mode-btn:hover {
-  background: rgba(255,255,255,0.18);
+  background: var(--bg-button-hover);
   transform: translateY(-1px);
 }
 .mode-btn.active {
   background: #2980ff;
   box-shadow: 0 0 12px rgba(41,128,255,0.6);
+  color: #fff;
 }
 .quiz-mode { animation: fadeIn 0.3s ease; }
 

@@ -10,12 +10,20 @@
 <body>
 
   <div class="glass-container fade">
-    <h1>私人題庫測驗系統</h1>
+    <div class="header-top">
+      <h1>題庫測驗系統</h1>
+      <button class="theme-toggle" onclick="toggleTheme()" title="切換主題">
+        <span class="theme-icon">🌙</span>
+      </button>
+    </div>
 
-    <!-- � 使用說明 -->
+    <!-- 📖 使用說明 -->
     <div class="guide-section">
-      <h3>📖 快速使用指南</h3>
-      <div class="guide-content">
+      <div class="guide-header">
+        <h3>📖 快速使用指南</h3>
+        <button class="guide-toggle" onclick="toggleGuide()">−</button>
+      </div>
+      <div class="guide-content" id="guideContent">
         <div class="guide-step">
           <span class="step-num">1</span>
           <div class="step-text">

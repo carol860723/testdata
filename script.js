@@ -1,4 +1,46 @@
 /***********************
+ *  主題管理
+ ************************/
+const themeKey = 'quiz_theme';
+
+function initTheme() {
+  const savedTheme = localStorage.getItem(themeKey) || 'dark';
+  document.body.setAttribute('data-theme', savedTheme);
+  updateThemeIcon(savedTheme);
+}
+
+function toggleTheme() {
+  const currentTheme = document.body.getAttribute('data-theme') || 'dark';
+  const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+  document.body.setAttribute('data-theme', newTheme);
+  localStorage.setItem(themeKey, newTheme);
+  updateThemeIcon(newTheme);
+}
+
+function updateThemeIcon(theme) {
+  const icon = document.querySelector('.theme-icon');
+  if (icon) {
+    icon.textContent = theme === 'dark' ? '☀️' : '🌙';
+  }
+}
+
+/***********************
+ *  指南展開/收起
+ ************************/
+function toggleGuide() {
+  const guideContent = document.getElementById('guideContent');
+  const guideBtn = document.querySelector('.guide-toggle');
+  
+  if (guideContent.classList.contains('collapsed')) {
+    guideContent.classList.remove('collapsed');
+    guideBtn.textContent = '−';
+  } else {
+    guideContent.classList.add('collapsed');
+    guideBtn.textContent = '+';
+  }
+}
+
+/***********************
  *  代碼分庫 + 狀態（全域）
  ************************/
 let currentKey = null;
@@ -44,6 +86,7 @@ const punchtimeKey = () => `punchtime_${currentKey}`;
 
 /* 啟動 */
 document.addEventListener('DOMContentLoaded', () => {
+  initTheme();  // 初始化主題
   const savedKey = localStorage.getItem(bankKeyStore);
   if (savedKey) { currentKey = savedKey; initByKey(); }
   else { showOnly('login'); }
